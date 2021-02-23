@@ -150,6 +150,9 @@ void Primitive2dXmlDump::decomposeAndWrite(
     const drawinglayer::primitive2d::Primitive2DContainer& rPrimitive2DSequence,
     ::tools::XmlWriter& rWriter)
 {
+    drawinglayer::geometry::ViewInformation2D aInfo;
+    drawinglayer::primitive2d::VisitingParameters aVisitingParameters(aInfo);
+
     for (size_t i = 0; i < rPrimitive2DSequence.size(); i++)
     {
         drawinglayer::primitive2d::Primitive2DReference xPrimitive2DReference = rPrimitive2DSequence[i];
@@ -404,7 +407,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 rWriter.startElement("metafile");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
                 // since the graphic is not rendered in a document, we do not need a concrete view information
-                rMetafilePrimitive2D.get2DDecomposition(aPrimitiveContainer, drawinglayer::geometry::ViewInformation2D());
+                rMetafilePrimitive2D.get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer,rWriter);
                 rWriter.endElement();
             }
@@ -416,8 +419,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 // SdrRectanglePrimitive2D is private to us.
                 rWriter.startElement("sdrrectangle");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
                 break;
@@ -428,8 +430,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 // SdrBlockTextPrimitive2D is private to us.
                 rWriter.startElement("sdrblocktext");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
                 break;
@@ -440,8 +441,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 // TextHierarchyBlockPrimitive2D.
                 rWriter.startElement("texthierarchyblock");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,  aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
                 break;
@@ -452,8 +452,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 // TextHierarchyParagraphPrimitive2D.
                 rWriter.startElement("texthierarchyparagraph");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
                 break;
@@ -464,8 +463,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 // TextHierarchyLinePrimitive2D.
                 rWriter.startElement("texthierarchyline");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
                 break;
@@ -476,8 +474,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 // ShadowPrimitive2D.
                 rWriter.startElement("shadow");
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
                 break;
@@ -489,8 +486,7 @@ void Primitive2dXmlDump::decomposeAndWrite(
                 rWriter.attribute("id", OUStringToOString(sCurrentElementTag, RTL_TEXTENCODING_UTF8));
                 rWriter.attribute("idNumber", nId);
                 drawinglayer::primitive2d::Primitive2DContainer aPrimitiveContainer;
-                pBasePrimitive->get2DDecomposition(aPrimitiveContainer,
-                                                   drawinglayer::geometry::ViewInformation2D());
+                pBasePrimitive->get2DDecomposition(aPrimitiveContainer, aVisitingParameters);
                 decomposeAndWrite(aPrimitiveContainer, rWriter);
                 rWriter.endElement();
             }

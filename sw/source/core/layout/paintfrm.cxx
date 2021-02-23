@@ -1797,9 +1797,10 @@ bool DrawFillAttributes(
                     nullptr,
                     0.0,
                     uno::Sequence< beans::PropertyValue >());
+                const drawinglayer::primitive2d::VisitingParameters aVisitingParameters(aViewInformation2D);
                 std::unique_ptr<drawinglayer::processor2d::BaseProcessor2D> pProcessor(drawinglayer::processor2d::createProcessor2DFromOutputDevice(
                     rOut,
-                    aViewInformation2D) );
+                    aVisitingParameters));
                 pProcessor->process(*pPrimitives);
                 return true;
             }
@@ -5096,9 +5097,10 @@ std::unique_ptr<drawinglayer::processor2d::BaseProcessor2D> SwFrame::CreateProce
             0.0,
             uno::Sequence< beans::PropertyValue >() );
 
-    return  drawinglayer::processor2d::createBaseProcessor2DFromOutputDevice(
+    const drawinglayer::primitive2d::VisitingParameters aVisitingParameters(aNewViewInfos);
+    return drawinglayer::processor2d::createBaseProcessor2DFromOutputDevice(
                     *getRootFrame()->GetCurrShell()->GetOut(),
-                    aNewViewInfos );
+                    aVisitingParameters);
 }
 
 void SwFrame::ProcessPrimitives( const drawinglayer::primitive2d::Primitive2DContainer& rSequence ) const

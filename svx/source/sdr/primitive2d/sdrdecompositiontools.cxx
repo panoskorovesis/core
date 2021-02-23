@@ -413,9 +413,10 @@ namespace drawinglayer::primitive2d
                     // since the decompose is view-independent
                     const uno::Sequence< beans::PropertyValue > xViewParameters;
                     geometry::ViewInformation2D aViewInformation2D(xViewParameters);
+                    const drawinglayer::primitive2d::VisitingParameters aVisitingParameters(aViewInformation2D);
 
                     // get range
-                    const basegfx::B2DRange aScaledRange(pNew->getB2DRange(aViewInformation2D));
+                    const basegfx::B2DRange aScaledRange(pNew->getB2DRange(aVisitingParameters));
 
                     // create left outside and right outside transformations. Also take care
                     // of the clip rectangle
@@ -460,7 +461,7 @@ namespace drawinglayer::primitive2d
                         // need the outliner for formatting (alternatively it is also possible to just add
                         // pNew to aNewPrimitiveSequence)
                         Primitive2DContainer aAnimSequence;
-                        pNew->get2DDecomposition(aAnimSequence, aViewInformation2D);
+                        pNew->get2DDecomposition(aAnimSequence, aVisitingParameters);
                         pNew.clear();
 
                         // create a new animatedInterpolatePrimitive and add it

@@ -107,6 +107,8 @@ namespace drawinglayer::unorenderer
                     }
 
                     const geometry::ViewInformation2D aViewInformation2D(aViewInformationSequence);
+                    primitive2d::VisitingParameters aVisitingParameters(aViewInformation2D);
+
                     const double fFactor100th_mmToInch(1.0 / (2.54 * 1000.0));
                     const sal_uInt32 nDiscreteWidth(basegfx::fround((fWidth * fFactor100th_mmToInch) * DPI_X));
                     const sal_uInt32 nDiscreteHeight(basegfx::fround((fHeight * fFactor100th_mmToInch) * DPI_Y));
@@ -129,7 +131,7 @@ namespace drawinglayer::unorenderer
                     BitmapEx aBitmapEx(
                         convertToBitmapEx(
                             xEmbedSeq,
-                            aViewInformation2D,
+                            aVisitingParameters,
                             nDiscreteWidth,
                             nDiscreteHeight,
                             MaximumQuadraticPixels));

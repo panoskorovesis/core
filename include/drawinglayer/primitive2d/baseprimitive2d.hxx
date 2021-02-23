@@ -27,6 +27,7 @@
 #include <com/sun/star/util/XAccounting.hpp>
 #include <cppuhelper/basemutex.hxx>
 #include <basegfx/range/b2drange.hxx>
+#include <drawinglayer/geometry/viewinformation2d.hxx>
 
 /** defines ImplPrimitive2DIDBlock
     Added to be able to simply change identification stuff later, e.g. add
@@ -37,24 +38,27 @@
 #define ImplPrimitive2DIDBlock(TheClass, TheID)                                                    \
     sal_uInt32 TheClass::getPrimitive2DID() const { return TheID; }
 
-namespace drawinglayer::geometry
-{
-class ViewInformation2D;
-}
-
 namespace drawinglayer::primitive2d
 {
 class DRAWINGLAYERCORE_DLLPUBLIC VisitingParameters
 {
-    const geometry::ViewInformation2D& mrViewInformation;
+private:
+    geometry::ViewInformation2D maViewInformation;
 
 public:
-    VisitingParameters(const geometry::ViewInformation2D& rViewInformation)
-        : mrViewInformation(rViewInformation)
+    explicit VisitingParameters(const geometry::ViewInformation2D& rViewInformation)
+        : maViewInformation(rViewInformation)
     {
     }
 
-    const geometry::ViewInformation2D& getViewInformation() const { return mrViewInformation; }
+    const css::uno::Sequence<css::beans::PropertyValue> getUnoProperties()
+    {
+        css::uno::Sequence<css::beans::PropertyValue> aPropertyValues;
+        aPropertyValues = maViewInformation.getViewInformationSequence();
+        return aPropertyValues;
+    }
+
+    const geometry::ViewInformation2D& getViewInformation() const { return maViewInformation; }
 };
 
 typedef cppu::WeakComponentImplHelper<css::graphic::XPrimitive2D, css::util::XAccounting>
@@ -232,9 +236,9 @@ protected:
     }
 
     /** method which is to be used to implement the local decomposition of a 2D primitive. */
-    virtual void
-    create2DDecomposition(Primitive2DContainer& rContainer,
-                          VisitingParameters const& rParameters) const = 0;
+    virtual void create2DDecomposition(Primitive2DContainer& rContainer,
+                                       VisitingParameters const& rParameters) const = 0;
+
 public:
     // constructor/destructor
     BufferedDecompositionPrimitive2D();

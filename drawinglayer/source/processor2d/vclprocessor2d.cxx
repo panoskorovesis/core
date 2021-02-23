@@ -827,7 +827,7 @@ void VclProcessor2D::RenderUnifiedTransparencePrimitive2D(
     else if (rTransCandidate.getTransparence() > 0.0 && rTransCandidate.getTransparence() < 1.0)
     {
         // transparence is in visible range
-        basegfx::B2DRange aRange(rTransCandidate.getChildren().getB2DRange(getViewInformation2D()));
+        basegfx::B2DRange aRange(rTransCandidate.getChildren().getB2DRange(maVisitingParameters));
         aRange.transform(maCurrentTransformation);
         impBufferDevice aBufferDevice(*mpOutputDevice, aRange);
 
@@ -856,7 +856,7 @@ void VclProcessor2D::RenderTransparencePrimitive2D(
     if (rTransCandidate.getChildren().empty())
         return;
 
-    basegfx::B2DRange aRange(rTransCandidate.getChildren().getB2DRange(getViewInformation2D()));
+    basegfx::B2DRange aRange(rTransCandidate.getChildren().getB2DRange(maVisitingParameters));
     aRange.transform(maCurrentTransformation);
     impBufferDevice aBufferDevice(*mpOutputDevice, aRange);
 
@@ -896,7 +896,7 @@ void VclProcessor2D::RenderTransformPrimitive2D(
 {
     // remember current transformation and ViewInformation
     const basegfx::B2DHomMatrix aLastCurrentTransformation(maCurrentTransformation);
-    const geometry::ViewInformation2D aLastViewInformation2D(getViewInformation2D());
+    primitive2d::VisitingParameters aLastVisitingParameters(maVisitingParameters);
 
     // create new transformations for CurrentTransformation
     // and for local ViewInformation2D
@@ -906,14 +906,15 @@ void VclProcessor2D::RenderTransformPrimitive2D(
         getViewInformation2D().getViewTransformation(), getViewInformation2D().getViewport(),
         getViewInformation2D().getVisualizedPage(), getViewInformation2D().getViewTime(),
         getViewInformation2D().getExtendedInformationSequence());
-    updateViewInformation(aViewInformation2D);
+    primitive2d::VisitingParameters aVisitingParameters(aViewInformation2D);
+    updateVisitingParameters(aVisitingParameters);
 
     // process content
     process(rTransformCandidate.getChildren());
 
     // restore transformations
     maCurrentTransformation = aLastCurrentTransformation;
-    updateViewInformation(aLastViewInformation2D);
+    updateVisitingParameters(aLastVisitingParameters);
 }
 
 // new XDrawPage for ViewInformation2D
@@ -921,7 +922,7 @@ void VclProcessor2D::RenderPagePreviewPrimitive2D(
     const primitive2d::PagePreviewPrimitive2D& rPagePreviewCandidate)
 {
     // remember current transformation and ViewInformation
-    const geometry::ViewInformation2D aLastViewInformation2D(getViewInformation2D());
+    primitive2d::VisitingParameters aLastVisitingParameters(maVisitingParameters);
 
     // create new local ViewInformation2D
     const geometry::ViewInformation2D aViewInformation2D(
@@ -929,13 +930,14 @@ void VclProcessor2D::RenderPagePreviewPrimitive2D(
         getViewInformation2D().getViewTransformation(), getViewInformation2D().getViewport(),
         rPagePreviewCandidate.getXDrawPage(), getViewInformation2D().getViewTime(),
         getViewInformation2D().getExtendedInformationSequence());
-    updateViewInformation(aViewInformation2D);
+    primitive2d::VisitingParameters aVisitingParameters(aViewInformation2D);
+    updateVisitingParameters(aVisitingParameters);
 
     // process decomposed content
     process(rPagePreviewCandidate);
 
     // restore transformations
-    updateViewInformation(aLastViewInformation2D);
+    updateVisitingParameters(aLastVisitingParameters);
 }
 
 // marker
@@ -1468,10 +1470,10 @@ void VclProcessor2D::adaptTextToFillDrawMode() const
 
 // process support
 
-VclProcessor2D::VclProcessor2D(const geometry::ViewInformation2D& rViewInformation,
+VclProcessor2D::VclProcessor2D(primitive2d::VisitingParameters const& rVisitingParameters,
                                OutputDevice& rOutDev,
                                const basegfx::BColorModifierStack& rInitStack)
-    : BaseProcessor2D(rViewInformation)
+    : BaseProcessor2D(rVisitingParameters)
     , mpOutputDevice(&rOutDev)
     , maBColorModifierStack(rInitStack)
     , maCurrentTransformation()
