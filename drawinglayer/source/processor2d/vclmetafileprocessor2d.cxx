@@ -2310,7 +2310,8 @@ void VclMetafileProcessor2D::processTransparencePrimitive2D(
                 getViewInformation2D().getVisualizedPage(), getViewInformation2D().getViewTime(),
                 getViewInformation2D().getExtendedInformationSequence());
 
-            primitive2d::VisitingParameters aVisitingParameters(aViewInfo);
+            primitive2d::VisitingParameters aVisitingParameters(
+                aViewInfo, maVisitingParameters.getTextLayouter());
 
             VclPixelProcessor2D aBufferProcessor(aVisitingParameters, *aBufferDevice);
 
@@ -2450,7 +2451,8 @@ void VclMetafileProcessor2D::processPrimitive2DOnPixelProcessor(
     auto pBufferDevice(CreateBufferDevice(aViewRange, aViewInfo, aRectLogic, aSizePixel));
     if (pBufferDevice)
     {
-        primitive2d::VisitingParameters aVisitingParameters(aViewInfo);
+        primitive2d::VisitingParameters aVisitingParameters(aViewInfo,
+                                                            maVisitingParameters.getTextLayouter());
         VclPixelProcessor2D aBufferProcessor(aVisitingParameters, *pBufferDevice,
                                              maBColorModifierStack);
 

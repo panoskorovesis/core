@@ -33,6 +33,7 @@
 #include <drawinglayer/geometry/viewinformation2d.hxx>
 #include <drawinglayer/attribute/lineattribute.hxx>
 #include <drawinglayer/attribute/fontattribute.hxx>
+#include <drawinglayer/processor2d/textlayoutdevice.hxx>
 
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
@@ -151,7 +152,8 @@ void Primitive2dXmlDump::decomposeAndWrite(
     ::tools::XmlWriter& rWriter)
 {
     drawinglayer::geometry::ViewInformation2D aInfo;
-    drawinglayer::primitive2d::VisitingParameters aVisitingParameters(aInfo);
+    auto pTextLayouter = std::make_shared<drawinglayer::processor2d::TextLayouterDevice>();
+    drawinglayer::primitive2d::VisitingParameters aVisitingParameters(aInfo, pTextLayouter);
 
     for (size_t i = 0; i < rPrimitive2DSequence.size(); i++)
     {
