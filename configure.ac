@@ -2939,6 +2939,8 @@ if test "$enable_wasm_strip" = "yes"; then
     with_x=no
 
     test "${with_fonts+set}" = set || with_fonts=yes
+
+    AC_DEFINE(HAVE_FEATURE_WASM_STRIP)
 fi
 
 ENABLE_SERVICES_RDB_FROM_BUILD=
@@ -14397,6 +14399,7 @@ AC_CONFIG_HEADERS([config_host/config_oauth2.h])
 AC_CONFIG_HEADERS([config_host/config_poppler.h])
 AC_CONFIG_HEADERS([config_host/config_python.h])
 AC_CONFIG_HEADERS([config_host/config_writerperfect.h])
+AC_CONFIG_HEADERS([config_host/config_wasm_strip.h])
 AC_CONFIG_HEADERS([solenv/lockfile/autoconf.h])
 AC_OUTPUT
 
