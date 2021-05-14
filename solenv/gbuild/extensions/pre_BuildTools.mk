@@ -24,6 +24,7 @@ gb_BUILD_TOOLS_executables = \
 		helpex \
 		idxdict \
 		javamaker \
+		lockfile \
 		makedepend \
 		propex \
 		saxparser \
