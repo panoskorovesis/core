@@ -41,6 +41,7 @@ gb_BUILD_TOOLS_executables = \
     $(if $(filter WNT,$(OS)),$(call gb_Helper_optional_for_host,DESKTOP,lngconvex)) \
 
 gb_BUILD_TOOLS_executables_extern = \
+    python \
 		xsltproc \
 
 gb_BUILD_TOOLS = \
