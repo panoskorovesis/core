@@ -1901,6 +1901,9 @@ AC_ARG_ENABLE(wasm-strip,
         [Strip the static build like for WASM/emscripten platform.]),
 ,enable_wasm_strip=yes)
 
+AC_ARG_ENABLE(services-rdb-from-build,
+    AS_HELP_STRING([--enable-services-rdb-from-build],
+        [Automatically create the services.rdb from all build components. WIP]))
 
 AC_ARG_ENABLE(xmlhelp,
     AS_HELP_STRING([--disable-xmlhelp],
@@ -2779,7 +2782,6 @@ AC_ARG_WITH(system-icu-for-build,
     AS_HELP_STRING([--with-system-icu-for-build=yes/no/force],
         [Use icu already on system for build tools (cross-compilation only).]))
 
-
 dnl ===================================================================
 dnl Check for incompatible options set by fuzzing, and reset those
 dnl automatically to working combinations
@@ -2897,6 +2899,12 @@ if test $_os != iOS -a $_os != Android -a $_os != Emscripten -a "$enable_fuzzers
     AC_DEFINE(HAVE_FEATURE_DESKTOP)
     AC_DEFINE(HAVE_FEATURE_MULTIUSER_ENVIRONMENT)
 fi
+
+ENABLE_SERVICES_RDB_FROM_BUILD=
+if test "$enable_services_rdb_from_build" = yes; then
+    ENABLE_SERVICES_RDB_FROM_BUILD=TRUE
+fi
+AC_SUBST(ENABLE_SERVICES_RDB_FROM_BUILD)
 
 # Whether to build "avmedia" functionality or not.
 
@@ -5432,6 +5440,7 @@ if test "$cross_compiling" = "yes"; then
         --disable-pdfimport \
         --disable-postgresql-sdbc \
         --disable-scripting \
+        --disable-service-rdb-from-build \
         --disable-skia \
         --enable-icecream="$enable_icecream" \
         --without-doxygen \
