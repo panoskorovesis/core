@@ -609,7 +609,7 @@ gb_vcl_extended_cups_check = $(if $(and $(USING_X11),$(ENABLE_CUPS)),$(1),$(2))
 
 $(eval $(call gb_Library_add_exception_objects,vcl,\
     $(if $(filter-out iOS ANDROID,$(OS)), \
-        vcl/source/app/salplug \
+        vcl/source/app/salplug$(if $(DISABLE_DYNLOADING),_static) \
     ) \
     $(call gb_vcl_use_headless_and_freetype_code, \
         $(call gb_vcl_extended_cups_check, \
