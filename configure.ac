@@ -1631,6 +1631,11 @@ AC_ARG_ENABLE(gtk3_kde5,
          platforms where Gtk3, Qt5 and Plasma is available.]),
 ,)
 
+AC_ARG_ENABLE(gen,
+    AS_HELP_STRING([--enable-gen],
+        [To select the gen backend in case of --disable-dynamic-loading])
+,)
+
 AC_ARG_ENABLE(gui,
     AS_HELP_STRING([--disable-gui],
         [Disable use of X11 or Wayland to reduce dependencies (e.g. for building LibreOfficeKit).]),
@@ -2927,6 +2932,10 @@ fi
 if test "$enable_database_connectivity" = yes; then
     BUILD_TYPE="$BUILD_TYPE DBCONNECTIVITY"
     AC_DEFINE(HAVE_FEATURE_DBCONNECTIVITY)
+else
+    enable_firebird_sdbc=no
+    enable_mariadb_sdbc=no
+    enable_postgresql_sdbc=no
 fi
 
 if test -z "$enable_extensions"; then
@@ -2971,6 +2980,14 @@ if test "$enable_dynamic_loading" = yes; then
     BUILD_TYPE="$BUILD_TYPE DYNLOADING"
 else
     DISABLE_DYNLOADING='TRUE'
+    if test $_os != iOS -a $_os != Android; then
+        enable_database_connectivity=no
+        enable_nss=no
+        enable_odk=no
+        enable_python=no
+        enable_skia=no
+        with_java=no
+    fi
 fi
 AC_SUBST(DISABLE_DYNLOADING)
 
@@ -3728,7 +3745,7 @@ if test -n "$WIN_MULTI_ARCH" -a -n "$WIN_OTHER_ARCH"; then
 fi
 
 
-if test "$_os" = "iOS" -o "$build_cpu" != "$host_cpu"; then
+if test "$_os" = "iOS" -o "$build_cpu" != "$host_cpu" -o "$DISABLE_DYNLOADING" = TRUE; then
     # To allow building Windows multi-arch releases without cross-tooling
     if test -z "$WIN_MULTI_ARCH" -a -z "$WIN_OTHER_ARCH"; then
         cross_compiling="yes"
@@ -5179,6 +5196,10 @@ if test "$with_x" = "no"; then
     USING_X11=
 fi
 
+if test -z "$USING_X11" -a "$DISABLE_DYNLOADING" = TRUE -a "$enable_gen" = "yes"; then
+    AC_MSG_ERROR([Can't select gen VCL plugin, if --without-x is used!])
+fi
+
 WORKDIR="${BUILDDIR}/workdir"
 INSTDIR="${BUILDDIR}/instdir"
 INSTROOTBASE=${INSTDIR}${INSTROOTBASESUFFIX}
@@ -5442,6 +5463,7 @@ if test "$cross_compiling" = "yes"; then
         --disable-scripting \
         --disable-service-rdb-from-build \
         --disable-skia \
+        --enable-dynamic-loading \
         --enable-icecream="$enable_icecream" \
         --without-doxygen \
         --without-webdav \
@@ -5691,7 +5713,16 @@ if test "$USING_X11" != TRUE; then
     test_kf5=no
     test_qt5=no
     test_gtk3_kde5=no
-    enable_cairo_canvas=no
+    if test "$DISABLE_DYNLOADING" = TRUE; then
+        enable_cairo_canvas=yes
+        test_cairo=yes
+        if test "$enable_qt5" = "yes"; then
+            test_qt5=yes
+        fi
+    else
+        enable_cairo_canvas=no
+        enable_gtk3=no
+    fi
 fi
 
 if test "$OS" = "HAIKU"; then
@@ -11466,9 +11497,6 @@ dnl ===================================================================
 dnl Show which vclplugs will be built.
 dnl ===================================================================
 R=""
-if test "$USING_X11" != TRUE; then
-    enable_gtk3=no
-fi
 
 ENABLE_GTK3=""
 if test "x$enable_gtk3" = "xyes"; then
@@ -11498,7 +11526,9 @@ ENABLE_QT5=""
 if test "x$enable_qt5" = "xyes"; then
     ENABLE_QT5="TRUE"
     AC_DEFINE(ENABLE_QT5)
-    R="$R qt5"
+    if test -z "$DISABLE_DYNLOADING" -o \( "$enable_kf5" != "yes" \); then
+        R="$R qt5"
+    fi
 fi
 AC_SUBST(ENABLE_QT5)
 
@@ -11510,7 +11540,7 @@ if test "x$enable_kf5" = "xyes"; then
 fi
 AC_SUBST(ENABLE_KF5)
 
-if test "x$USING_X11" = "xyes"; then
+if test "x$USING_X11" = "xyes" -a \( -z "$DISABLE_DYNLOADING" -o "$enable_gen" = "yes" \); then
     R="$R gen"
 fi
 
@@ -11519,7 +11549,7 @@ if test "$_os" = "WINNT"; then
 elif test "$_os" = "Darwin"; then
     R="$R osx"
 elif test "$_os" = "iOS"; then
-    R="ios (builtin)"
+    R="ios"
 fi
 
 build_vcl_plugins="$R"
@@ -11529,6 +11559,10 @@ fi
 AC_MSG_NOTICE([VCLplugs to be built:${build_vcl_plugins}])
 VCL_PLUGIN_INFO=$R
 AC_SUBST([VCL_PLUGIN_INFO])
+
+if test "$DISABLE_DYNLOADING" = TRUE -a -z "$DISABLE_GUI" -a \( -z "$R" -o $(echo "$R" | wc -w) -ne 1 \); then
+    AC_MSG_ERROR([Can't build --disable-dynamic-loading without --disable-gui and a single VCL plugin"])
+fi
 
 dnl ===================================================================
 dnl Check for GTK libraries
@@ -12266,16 +12300,15 @@ AC_SUBST(CLANG_USE_LD)
 
 SYSTEM_GPGMEPP=
 
+AC_MSG_CHECKING([whether to enable gpgmepp])
 if test "$enable_gpgmepp" = no; then
-    AC_MSG_CHECKING([whether to enable gpgmepp])
     AC_MSG_RESULT([no])
 elif test "$enable_mpl_subset" = "yes"; then
-    AC_MSG_CHECKING([whether gpgmepp should be disabled due to building just MPL])
-    AC_MSG_RESULT([yes])
+    AC_MSG_RESULT([no (MPL only])
 elif test "$enable_fuzzers" = "yes"; then
-    AC_MSG_CHECKING([whether gpgmepp should be disabled due to oss-fuzz])
+    AC_MSG_RESULT([no (oss-fuzz)])
+elif test \( \( "$_os" = "Linux" -o "$_os" = "Darwin" \) -a "$ENABLE_NSS" = TRUE \) -o "$_os" = "WINNT" ; then
     AC_MSG_RESULT([yes])
-elif test "$_os" = "Linux" -o "$_os" = "Darwin" -o "$_os" = "WINNT" ; then
     dnl ===================================================================
     dnl Check for system gpgme
     dnl ===================================================================
@@ -12350,6 +12383,8 @@ elif test "$_os" = "Linux" -o "$_os" = "Darwin" -o "$_os" = "WINNT" ; then
         AC_MSG_RESULT([no])
      fi
    fi
+else
+    AC_MSG_RESULT([no (unsuppoted OS or missing NSS)])
 fi
 AC_SUBST(ENABLE_GPGMEPP)
 AC_SUBST(SYSTEM_GPGMEPP)
