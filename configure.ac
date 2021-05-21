@@ -1904,7 +1904,7 @@ AC_ARG_ENABLE(curl,
 AC_ARG_ENABLE(wasm-strip,
     AS_HELP_STRING([--enable-wasm-strip],
         [Strip the static build like for WASM/emscripten platform.]),
-,enable_wasm_strip=yes)
+,)
 
 AC_ARG_ENABLE(services-rdb-from-build,
     AS_HELP_STRING([--enable-services-rdb-from-build],
@@ -2905,6 +2905,42 @@ if test $_os != iOS -a $_os != Android -a $_os != Emscripten -a "$enable_fuzzers
     AC_DEFINE(HAVE_FEATURE_MULTIUSER_ENVIRONMENT)
 fi
 
+# explicitly doesn't include enable_gtk3=no and enable_qt5=yes, so it should
+# also work with the default gtk3 plugin.
+if test "$enable_wasm_strip" = "yes"; then
+    enable_avmedia=no
+    enable_cmis=no
+    enable_coinmp=no
+    enable_cups=no
+    enable_curl=no
+    enable_database_connectivity=no
+    enable_dbus=no
+    enable_dconf=no
+    test "${enable_dynamic_loading+set}" = set || enable_dynamic_loading=no
+    enable_extension_integration=no
+    enable_extensions=no
+    enable_extension_update=no
+    enable_gio=no
+    enable_gpgmepp=no
+    enable_gstreamer_1_0=no
+    enable_ldap=no
+    enable_lpsolve=no
+    enable_nss=no
+    enable_odk=no
+    enable_online_update=no
+    enable_opencl=no
+    enable_pdfimport=no
+    enable_randr=no
+    enable_report_builder=no
+    enable_scripting=no
+    enable_sdremote_bluetooth=no
+    enable_skia=no
+    enable_xmlhelp=no
+    with_x=no
+
+    test "${with_fonts+set}" = set || with_fonts=yes
+fi
+
 ENABLE_SERVICES_RDB_FROM_BUILD=
 if test "$enable_services_rdb_from_build" = yes; then
     ENABLE_SERVICES_RDB_FROM_BUILD=TRUE
@@ -3752,7 +3788,7 @@ if test "$_os" = "iOS" -o "$build_cpu" != "$host_cpu" -o "$DISABLE_DYNLOADING" =
     fi
 fi
 
-ENABLE_WASM_STRIP=''
+ENABLE_WASM_STRIP=
 if test "$cross_compiling" = "yes"; then
     export CROSS_COMPILING=TRUE
     if test "$enable_dynamic_loading" != yes -a "$enable_wasm_strip" = yes; then
@@ -5443,7 +5479,6 @@ if test "$cross_compiling" = "yes"; then
     test -n "$TARFILE_LOCATION" && sub_conf_opts="$sub_conf_opts --with-external-tar=$TARFILE_LOCATION"
     test "$with_system_icu_for_build" = "yes" -o "$with_system_icu_for_build" = "force" && sub_conf_opts="$sub_conf_opts --with-system-icu"
     test "$with_galleries" = "no" -o -z "$WITH_GALLERY_BUILD" && sub_conf_opts="$sub_conf_opts --with-galleries=no"
-    test "$enable_wasm_strip" = "yes" && sub_conf_opts="$sub_conf_opts --enable-wasm-strip"
     sub_conf_opts="$sub_conf_opts $with_build_platform_configure_options"
 
     # Don't bother having configure look for stuff not needed for the build platform anyway
