@@ -28,6 +28,10 @@ $(eval $(call gb_Library_add_exception_objects,avmedia,\
 	avmedia/source/avmediadummy \
 ))
 
+$(eval $(call gb_Library_use_externals,avmedia,\
+    boost_headers \
+))
+
 else # AVMEDIA
 
 ifeq (,$(DISABLE_GUI))
