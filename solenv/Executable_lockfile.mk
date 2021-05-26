@@ -11,6 +11,7 @@ $(eval $(call gb_Executable_Executable,lockfile))
 
 $(eval $(call gb_Executable_set_include,lockfile, \
     -I$(SRCDIR)/solenv/lockfile \
+    -I$(BUILDDIR)/solenv/lockfile \
 ))
 
 $(eval $(call gb_Executable_add_cobjects,lockfile, \
