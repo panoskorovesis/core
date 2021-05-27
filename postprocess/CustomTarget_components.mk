@@ -35,6 +35,8 @@ $(postprocess_WORKDIR)/services_constructors.list: \
 	    $(call gb_Helper_abbreviate_dirs,$(call gb_ExternalExecutable_get_command,python) $^) > $$TEMPFILE && \
 	    $(call gb_Helper_replace_if_different_and_touch,$${TEMPFILE},$@)
 
+.PHONY: $(postprocess_WORKDIR)/services_componentfiles.list
+
 endif
 
 # vim: set noet sw=4:

@@ -548,6 +548,32 @@ vcl_headless_freetype_code=\
     vcl/unx/generic/print/prtsetup \
     vcl/unx/generic/print/text_gfx \
 
+gb_vcl_extended_cups_check = $(if $(and $(USING_X11),$(ENABLE_CUPS)),$(1),$(2))
+
+define gb_vcl_use_headless_and_freetype_code_direct
+
+$(eval $(call gb_Library_add_exception_objects,vcl,\
+        $(call gb_vcl_extended_cups_check, \
+            vcl/unx/generic/printer/cupsmgr \
+            vcl/unx/generic/printer/printerinfomanager \
+        , \
+            vcl/null/printerinfomanager \
+        ) \
+        $(vcl_headless_code) \
+        $(vcl_headless_freetype_code) \
+    ) \
+))
+
+$(eval $(call gb_Library_use_externals,vcl,\
+        cairo \
+        $(call gb_vcl_extended_cups_check,cups) \
+        $(if $(SYSTEM_FONTCONFIG),,expat) \
+        fontconfig \
+        freetype \
+))
+
+endef
+
 ifeq ($(USING_X11),TRUE)
 $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/unx/generic/window/screensaverinhibitor \
@@ -604,8 +630,8 @@ endif # !DISABLE_GUI
 # * select headless code and corresponding libraries
 #
 gb_vcl_use_headless_and_freetype_code = \
-    $(if $(or $(filter ANDROID HAIKU,$(OS)),$(USING_X11),$(DISABLE_GUI)),$(1),$(2))
-gb_vcl_extended_cups_check = $(if $(and $(USING_X11),$(ENABLE_CUPS)),$(1),$(2))
+    $(if $(or $(filter ANDROID HAIKU,$(OS)),$(USING_X11),$(DISABLE_GUI), \
+         $(and $(DISABLE_DYNLOADING),$(call gb_not,$(DISABLE_GUI)))),$(1),$(2))
 
 $(eval $(call gb_Library_add_exception_objects,vcl,\
     $(if $(filter-out iOS ANDROID,$(OS)), \

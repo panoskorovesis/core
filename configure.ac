@@ -1118,6 +1118,7 @@ haiku*)
 
 emscripten)
     build_gstreamer_1_0=no
+    enable_compiler_plugins=no
     enable_lpsolve=no
     enable_report_builder=no
     enable_xmlhelp=no
@@ -2495,6 +2496,7 @@ AC_ARG_WITH(locales,
          Very experimental and might well break stuff.
          Just a desperate measure to shrink code and data size.
          By default all the locales available is included.
+         Just works with --disable-dynloading. Defaults to "all".
          This option is completely unrelated to --with-lang.])
     [
                           Affects also our character encoding conversion
@@ -2911,10 +2913,12 @@ dnl "desktop" one but a "mobile" one, we are always cross-compiling.
 dnl Note the direction of the implication; there is no assumption that
 dnl cross-compiling would imply a non-desktop OS.
 
-if test $_os != iOS -a $_os != Android -a $_os != Emscripten -a "$enable_fuzzers" != "yes"; then
+if test $_os != iOS -a $_os != Android -a "$enable_fuzzers" != "yes"; then
     BUILD_TYPE="$BUILD_TYPE DESKTOP"
     AC_DEFINE(HAVE_FEATURE_DESKTOP)
-    AC_DEFINE(HAVE_FEATURE_MULTIUSER_ENVIRONMENT)
+    if test "$_os" = Emscripten; then
+        AC_DEFINE(HAVE_FEATURE_MULTIUSER_ENVIRONMENT)
+    fi
 fi
 
 # explicitly doesn't include enable_gtk3=no and enable_qt5=yes, so it should
@@ -2934,7 +2938,6 @@ if test "$enable_wasm_strip" = "yes"; then
     enable_extension_update=no
     enable_gio=no
     enable_gpgmepp=no
-    enable_gstreamer_1_0=no
     enable_ldap=no
     enable_lpsolve=no
     enable_nss=no
@@ -2948,9 +2951,15 @@ if test "$enable_wasm_strip" = "yes"; then
     enable_sdremote_bluetooth=no
     enable_skia=no
     enable_xmlhelp=no
+    enable_zxing=no
+    test_libepubgen=no
+#    with_system_libxml=no
+    with_galleries=no
+    with_webdav=no
     with_x=no
 
     test "${with_fonts+set}" = set || with_fonts=yes
+    test "${with_locales+set}" = set || with_locales=en
 
     AC_DEFINE(HAVE_FEATURE_WASM_STRIP)
 fi
@@ -2958,6 +2967,9 @@ fi
 ENABLE_SERVICES_RDB_FROM_BUILD=
 if test "$enable_services_rdb_from_build" = yes; then
     ENABLE_SERVICES_RDB_FROM_BUILD=TRUE
+    if test -n "$with_locales" -a "$with_locales" != en -a "$with_locales" != all; then
+        AC_MSG_ERROR([Currently just --with-locales=all or en is supported with --enable-services-rdb-from-build])
+    fi
 fi
 AC_SUBST(ENABLE_SERVICES_RDB_FROM_BUILD)
 
@@ -2972,16 +2984,7 @@ fi
 
 # Decide whether to build database connectivity stuff (including
 # Base) or not. We probably don't want to on non-desktop OSes.
-if test -z "$enable_database_connectivity"; then
-    # --disable-database-connectivity is unfinished work in progress
-    # and the iOS test app doesn't link if we actually try to use it.
-    # if test $_os != iOS -a $_os != Android; then
-    if test $_os != iOS; then
-        enable_database_connectivity=yes
-    fi
-fi
-
-if test "$enable_database_connectivity" = yes; then
+if test "$enable_database_connectivity" != no; then
     BUILD_TYPE="$BUILD_TYPE DBCONNECTIVITY"
     AC_DEFINE(HAVE_FEATURE_DBCONNECTIVITY)
 else
@@ -5525,6 +5528,7 @@ if test "$cross_compiling" = "yes"; then
         --enable-icecream="$enable_icecream" \
         --without-doxygen \
         --without-webdav \
+        --without-x \
         --with-parallelism="$with_parallelism" \
         --with-theme="$with_theme" \
         --with-tls=openssl \
@@ -9495,10 +9499,11 @@ else
     SYSTEM_LIBXSLT=
     BUILD_TYPE="$BUILD_TYPE LIBXSLT"
 fi
-AC_SUBST(SYSTEM_LIBXSLT)
 if test -z "$SYSTEM_LIBXSLT_FOR_BUILD"; then
     SYSTEM_LIBXSLT_FOR_BUILD="$SYSTEM_LIBXSLT"
 fi
+
+AC_SUBST(SYSTEM_LIBXSLT)
 AC_SUBST(SYSTEM_LIBXSLT_FOR_BUILD)
 
 AC_SUBST(LIBEXSLT_CFLAGS)
@@ -13706,7 +13711,7 @@ if test -d "$SRC_ROOT/translations/source"; then
 fi
 AC_SUBST(WITH_POOR_HELP_LOCALIZATIONS)
 
-if test -n "$with_locales"; then
+if test -n "$with_locales" -a "$with_locales" != all; then
     WITH_LOCALES="$with_locales"
 
     just_langs="`echo $WITH_LOCALES | sed -e 's/_[A-Z]*//g'`"

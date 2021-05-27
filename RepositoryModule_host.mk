@@ -50,7 +50,9 @@ endif
 
 $(eval $(call gb_Module_add_moduledirs,libreoffice,\
 	android \
+    $(if $(ENABLE_WASM_STRIP_BASIC_CALC_DRAW_MATH_IMPRESS),, \
 	animations \
+    ) \
 	apple_remote \
 	avmedia \
     $(if $(ENABLE_WASM_STRIP_BASIC_CALC_DRAW_MATH_IMPRESS),, \

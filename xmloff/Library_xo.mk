@@ -19,12 +19,15 @@
 
 $(eval $(call gb_Library_Library,xo))
 
-$(eval $(call gb_Library_set_componentfile,xo,xmloff/util/xo))
-
-# WASM_CHART change
-ifneq ($(ENABLE_WASM_STRIP_CHART),TRUE)
-$(eval $(call gb_Library_set_componentfile,xo,xmloff/util/xo.extended))
-endif
+$(eval $(call gb_Library_set_componentfiles,xo, \
+    xmloff/util/xo \
+    $(if $(ENABLE_WASM_STRIP_CHART),,xmloff/util/xo.chart) \
+    $(if $(ENABLE_WASM_STRIP_BASIC_CALC_DRAW_MATH_IMPRESS),, \
+        xmloff/util/xo.draw \
+        xmloff/util/xo.impress \
+        xmloff/util/xo.writer \
+    ) \
+))
 
 $(eval $(call gb_Library_set_precompiled_header,xo,xmloff/inc/pch/precompiled_xo))
 

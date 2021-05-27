@@ -15,6 +15,10 @@ $(eval $(call gb_Library_set_include,avmedia,\
 	-I$(SRCDIR)/avmedia/source/inc \
 ))
 
+$(eval $(call gb_Library_use_externals,avmedia,\
+    boost_headers \
+))
+
 $(eval $(call gb_Library_use_libraries,avmedia,\
     sal \
     svl \
@@ -39,7 +43,6 @@ $(eval $(call gb_Library_add_defs,avmedia,\
 $(eval $(call gb_Library_set_componentfile,avmedia,avmedia/util/avmedia))
 
 $(eval $(call gb_Library_use_externals,avmedia,\
-    boost_headers \
     epoxy \
 ))
 

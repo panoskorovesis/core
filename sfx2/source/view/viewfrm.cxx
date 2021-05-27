@@ -1344,9 +1344,8 @@ void SfxViewFrame::Notify( SfxBroadcaster& /*rBC*/, const SfxHint& rHint )
                 rBind.Invalidate( SID_RELOAD );
                 rBind.Invalidate( SID_EDITDOC );
 
-                const auto t0 = std::chrono::system_clock::now().time_since_epoch();
-
 #ifndef ENABLE_WASM_STRIP_PINGUSER
+                const auto t0 = std::chrono::system_clock::now().time_since_epoch();
                 bool bIsUITest = false; //uitest.uicheck fails when the dialog is open
                 for( sal_uInt16 i = 0; i < Application::GetCommandLineParamCount(); i++ )
                 {
